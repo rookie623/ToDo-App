@@ -16,6 +16,7 @@ window.addEventListener('DOMContentLoaded', function () {
   const token = localStorage.jwt;
   const inputNuevaTarea = document.getElementById('nuevaTarea')
   const cantTareasFinalizadas = document.getElementById('cantidad-finalizadas')
+  const cantTareasPendientes = document.getElementById('cantidad-pendientes')
   const unorderlistTareasTerminadas = document.querySelector('.tareas-terminadas')
   const unorderlistTareasPendientes = document.querySelector('.tareas-pendientes')
   obtenerNombreUsuario()
@@ -69,7 +70,7 @@ window.addEventListener('DOMContentLoaded', function () {
         return response.json()
     })
     .then(userTasks => {
-      cantTareasFinalizadas.innerText = userTasks.length
+      cantTareasPendientes.innerText = userTasks.length
       renderizarTareas(userTasks)
       })
   }
