@@ -3,7 +3,7 @@
 
 
 /* ------ comienzan las funcionalidades una vez que carga el documento ------ */
-window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function () {
   if(!localStorage.jwt){
     window.location.replace('./index.html')
   }
@@ -18,10 +18,15 @@ window.addEventListener('DOMContentLoaded', function () {
   const cantTareasFinalizadas = document.getElementById('cantidad-finalizadas')
   const cantTareasPendientes = document.getElementById('cantidad-pendientes')
   const unorderlistTareasTerminadas = document.querySelector('.tareas-terminadas')
-  const unorderlistTareasPendientes = document.querySelector('.tareas-pendientes')
+  const undoneTasksList = document.querySelector('.tareas-pendientes')
+  const botonesBorrar = document.querySelectorAll('.borrar')
+  const userTasks = JSON.parse(localStorage.userTasks)
+  cantTareasPendientes.innerText = userTasks.length
+  console.log(botonesBorrar);
+  
   obtenerNombreUsuario()
   consultarTareas()
-  
+  renderizarTareas(userTasks)
 
   
   /* -------------------------------------------------------------------------- */
@@ -70,8 +75,7 @@ window.addEventListener('DOMContentLoaded', function () {
         return response.json()
     })
     .then(userTasks => {
-      cantTareasPendientes.innerText = userTasks.length
-      renderizarTareas(userTasks)
+      localStorage.setItem('userTasks',JSON.stringify(userTasks))
       })
   }
 
@@ -100,7 +104,6 @@ window.addEventListener('DOMContentLoaded', function () {
     })
     .then(taskCreated => {
       consultarTareas()
-      // renderizarTareas(taskCreated)
     })
     inputNuevaTarea.value = ''
   }
@@ -110,18 +113,18 @@ window.addEventListener('DOMContentLoaded', function () {
   /* -------------------------------------------------------------------------- */
   /*                  FUNCIÓN 5 - Renderizar tareas en pantalla                 */
   /* -------------------------------------------------------------------------- */
-  function renderizarTareas(listado) {
-    unorderlistTareasPendientes.innerHTML = ''
+  function renderizarTareas(taskList) {
+    undoneTasksList.innerHTML = ''
     unorderlistTareasTerminadas.innerHTML = ''
-    listado.forEach(task => {
+    taskList.forEach(task => {
       console.log(task)
       const hora = new Date(task.createdAt)
-      unorderlistTareasPendientes.innerHTML += `
+      undoneTasksList.innerHTML += `
       <li class="tarea">
         <div class="descripcion">
           <p class="nombre">${task.description}</p>
-          <p class="timestamp">${hora.getHours()}:${hora.getMinutes()}</p>
-          <button id=${task.id}>
+          <p class="timestamp">Creado: ${hora.getHours()}:${hora.getMinutes()}hs</p>
+          <button class="borrar" id=${task.id}>
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -158,4 +161,5 @@ window.addEventListener('DOMContentLoaded', function () {
        console.log(data);
      })
   }
+
 });
