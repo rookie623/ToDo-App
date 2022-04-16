@@ -1,4 +1,4 @@
-
+'use strict'
 window.addEventListener('load', function () {
     /* ---------------------- obtenemos variables globales ---------------------- */
     const form = document.querySelector('form')

@@ -1,3 +1,4 @@
+'use strict'
 // SEGURIDAD: Si no se encuentra en localStorage info del usuario
 // no lo deja acceder a la página, redirigiendo al login inmediatamente.
 
@@ -10,24 +11,19 @@ window.addEventListener('load', function () {
 
   /* ---------------- variables globales y llamado a funciones ---------------- */
   const url = "https://ctd-todo-api.herokuapp.com/v1"
+  const token = localStorage.jwt;
   const btnCerrarSesion = document.getElementById('closeApp')
   const formCrearTarea = document.querySelector('form')
   const username = document.querySelector('p')
-  const token = localStorage.jwt;
   const inputNuevaTarea = document.getElementById('nuevaTarea')
   const cantTareasFinalizadas = document.getElementById('cantidad-finalizadas')
   const cantTareasPendientes = document.getElementById('cantidad-pendientes')
   const unorderlistTareasTerminadas = document.querySelector('.tareas-terminadas')
   const undoneTasksList = document.querySelector('.tareas-pendientes')
   const botonesBorrar = document.querySelectorAll('.borrar')
-  const userTasks = JSON.parse(localStorage.userTasks)
-  cantTareasPendientes.innerText = userTasks.length
-  console.log(botonesBorrar);
-  
+
   obtenerNombreUsuario()
   consultarTareas()
-  renderizarTareas(userTasks)
-
   
   /* -------------------------------------------------------------------------- */
   /*                          FUNCIÓN 1 - Cerrar sesión                         */
@@ -74,9 +70,10 @@ window.addEventListener('load', function () {
     .then(response => {
         return response.json()
     })
-    .then(userTasks => {
-      localStorage.setItem('userTasks',JSON.stringify(userTasks))
-      })
+    .then(fetchUserTasks => {
+      cantTareasPendientes.innerText = fetchUserTasks.length
+      renderizarTareas(fetchUserTasks)
+    })
   }
 
 
@@ -86,27 +83,25 @@ window.addEventListener('load', function () {
 
   formCrearTarea.addEventListener('submit', function (event) {
     event.preventDefault()
-    if(inputNuevaTarea.value != ' '){
-    const settings = {
-      method: 'POST',
-      body: JSON.stringify({
-        "description": inputNuevaTarea.value,
-        "completed": false,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'authorization': token
+    if(inputNuevaTarea.value !== '') {
+      const settings = {
+        method: 'POST',
+        body: JSON.stringify({
+          "description": inputNuevaTarea.value,
+          "completed": false,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token
+        }
       }
+      fetch(`${url}/tasks`, settings)
+      .then(response => {
+          return response.json()
+      })
+      .then(taskCreated => {
+      })
     }
-    fetch(`${url}/tasks`, settings)
-    .then(response => {
-        return response.json()
-    })
-    .then(taskCreated => {
-      consultarTareas()
-    })
-    inputNuevaTarea.value = ''
-  }
   });
 
 
@@ -114,21 +109,44 @@ window.addEventListener('load', function () {
   /*                  FUNCIÓN 5 - Renderizar tareas en pantalla                 */
   /* -------------------------------------------------------------------------- */
   function renderizarTareas(taskList) {
-    undoneTasksList.innerHTML = ''
-    unorderlistTareasTerminadas.innerHTML = ''
     taskList.forEach(task => {
-      console.log(task)
+
       const hora = new Date(task.createdAt)
-      undoneTasksList.innerHTML += `
-      <li class="tarea">
-        <div class="descripcion">
-          <p class="nombre">${task.description}</p>
-          <p class="timestamp">Creado: ${hora.getHours()}:${hora.getMinutes()}hs</p>
-          <button class="borrar" id=${task.id}>
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      </li>`
+
+      const icono = document.createElement('i')
+      icono.classList.add('fa-solid')
+      icono.classList.add('fa-trash-can')
+
+      const btnBorrar = document.createElement('button')
+      btnBorrar.appendChild(icono)
+      btnBorrar.classList.add('borrar')
+
+      // btnBorrar.onclick = botonBorrarTarea
+      btnBorrar.addEventListener('click', () =>{
+        botonBorrarTarea(`${task.id}`)
+      })
+
+      const nombre = document.createElement('p')
+      nombre.classList.add('nombre')
+      nombre.innerText = `${task.description}`
+
+      const timeStamp = document.createElement('p')
+      timeStamp.classList.add('timestamp')
+      timeStamp.innerText = `Creado: ${hora.getHours()}:${hora.getMinutes()}hs`
+
+      const descripcion = document.createElement('div')
+      descripcion.classList.add('descripcion')
+      descripcion.setAttribute('id', `${task.id}`)
+
+      descripcion.appendChild(nombre)
+      descripcion.appendChild(timeStamp)
+      descripcion.appendChild(btnBorrar)
+
+      const tarea = document.createElement('li')
+      tarea.classList.add('tarea')
+      tarea.appendChild(descripcion)
+
+      undoneTasksList.appendChild(tarea)
     })
   };
 
@@ -146,7 +164,7 @@ window.addEventListener('load', function () {
   /* -------------------------------------------------------------------------- */
   /*                     FUNCIÓN 7 - Eliminar tarea [DELETE]                    */
   /* -------------------------------------------------------------------------- */
-  function botonBorrarTarea() {
+  function botonBorrarTarea(id) {
     const settings = { 
       method: "DELETE",
       headers: {
@@ -158,8 +176,7 @@ window.addEventListener('load', function () {
        return response.text()
      })
      .then(data => {
-       console.log(data);
+      console.log(data);
      })
   }
-
 });
