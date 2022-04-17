@@ -39,7 +39,8 @@ window.addEventListener('load', function () {
             return response.json()
         })
         .then(info => {
-            window.location.replace('./index.html')
+            console.log(info);
+            // window.location.replace('./index.html')
         })
     };
 });

@@ -16,11 +16,8 @@ window.addEventListener('load', function () {
   const formCrearTarea = document.querySelector('form')
   const username = document.querySelector('p')
   const inputNuevaTarea = document.getElementById('nuevaTarea')
-  const cantTareasFinalizadas = document.getElementById('cantidad-finalizadas')
-  const cantTareasPendientes = document.getElementById('cantidad-pendientes')
-  const unorderlistTareasTerminadas = document.querySelector('.tareas-terminadas')
+  const cantTareasPendientes = document.getElementById('cantidad-finalizadas')
   const undoneTasksList = document.querySelector('.tareas-pendientes')
-  const botonesBorrar = document.querySelectorAll('.borrar')
 
   obtenerNombreUsuario()
   consultarTareas()
@@ -73,6 +70,7 @@ window.addEventListener('load', function () {
     .then(fetchUserTasks => {
       cantTareasPendientes.innerText = fetchUserTasks.length
       renderizarTareas(fetchUserTasks)
+      console.log(fetchUserTasks);
     })
   }
 
@@ -113,17 +111,29 @@ window.addEventListener('load', function () {
 
       const hora = new Date(task.createdAt)
 
-      const icono = document.createElement('i')
-      icono.classList.add('fa-solid')
-      icono.classList.add('fa-trash-can')
+      const trashIcon = document.createElement('i')
+      trashIcon.classList.add('fa-solid')
+      trashIcon.classList.add('fa-trash-can')
+
+      const clipboard = document.createElement('i')
+      clipboard.classList.add('fa-solid')
+      clipboard.classList.add('fa-clipboard')
+
+      const btnClipboard = document.createElement('button')
+      btnClipboard.appendChild(clipboard)
+      btnClipboard.classList.add('clipboard')
 
       const btnBorrar = document.createElement('button')
-      btnBorrar.appendChild(icono)
+      btnBorrar.appendChild(trashIcon)
       btnBorrar.classList.add('borrar')
 
       // btnBorrar.onclick = botonBorrarTarea
       btnBorrar.addEventListener('click', () =>{
         botonBorrarTarea(`${task.id}`)
+      })
+
+      btnClipboard.addEventListener('click', () =>{
+        botonesCambioEstado(task)
       })
 
       const nombre = document.createElement('p')
@@ -140,6 +150,7 @@ window.addEventListener('load', function () {
 
       descripcion.appendChild(nombre)
       descripcion.appendChild(timeStamp)
+      descripcion.appendChild(btnClipboard)
       descripcion.appendChild(btnBorrar)
 
       const tarea = document.createElement('li')
@@ -153,11 +164,25 @@ window.addEventListener('load', function () {
   /* -------------------------------------------------------------------------- */
   /*                  FUNCIÓN 6 - Cambiar estado de tarea [PUT]                 */
   /* -------------------------------------------------------------------------- */
-  function botonesCambioEstado() {
-
-
-
-
+  function botonesCambioEstado(task) {
+    const settings = { 
+      method: "PUT",
+      body: JSON.stringify({
+        "description": `${task.description}`,
+        "completed": `${!task.completed}`
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'authorization': token
+      }
+    }
+     fetch(`${url}/tasks/${task.id}`, settings)
+     .then(response => {
+       return response.text()
+     })
+     .then(data => {
+      // console.log(data);
+     })
   }
 
 
@@ -168,7 +193,8 @@ window.addEventListener('load', function () {
     const settings = { 
       method: "DELETE",
       headers: {
-       "authorization": token
+        'Content-Type': 'application/json',
+        'authorization': token,
       }
     }
      fetch(`${url}/tasks/${id}`, settings)
