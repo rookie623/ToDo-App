@@ -16,8 +16,10 @@ window.addEventListener('load', function () {
   const formCrearTarea = document.querySelector('form')
   const username = document.querySelector('p')
   const inputNuevaTarea = document.getElementById('nuevaTarea')
-  const cantTareasPendientes = document.getElementById('cantidad-finalizadas')
+  const cantTareasPendientes = document.getElementById('cantidad-pendientes')
+  const cantTareasFinalizadas = document.getElementById('cantidad-finalizadas')
   const undoneTasksList = document.querySelector('.tareas-pendientes')
+  const doneTasksList = document.querySelector('.tareas-terminadas')
 
   obtenerNombreUsuario()
   consultarTareas()
@@ -68,9 +70,9 @@ window.addEventListener('load', function () {
         return response.json()
     })
     .then(fetchUserTasks => {
-      cantTareasPendientes.innerText = fetchUserTasks.length
+      cantTareasFinalizadas.innerText = fetchUserTasks.filter(task => task.completed).length
+      cantTareasPendientes.innerText = fetchUserTasks.length - parseInt(cantTareasFinalizadas.innerText)
       renderizarTareas(fetchUserTasks)
-      console.log(fetchUserTasks);
     })
   }
 
@@ -110,54 +112,49 @@ window.addEventListener('load', function () {
     taskList.forEach(task => {
 
       const hora = new Date(task.createdAt)
-
       const trashIcon = document.createElement('i')
+      const clipboard = document.createElement('i')
+      const btnClipboard = document.createElement('button')
+      const btnBorrar = document.createElement('button')
+      const nombre = document.createElement('p')
+      const timeStamp = document.createElement('p')
+      const descripcion = document.createElement('div')
+      const tarea = document.createElement('li')
+      
+      
       trashIcon.classList.add('fa-solid')
       trashIcon.classList.add('fa-trash-can')
 
-      const clipboard = document.createElement('i')
       clipboard.classList.add('fa-solid')
-      clipboard.classList.add('fa-clipboard')
+      task.completed ? clipboard.classList.add('fa-clipboard-check') : clipboard.classList.add('fa-clipboard')
 
-      const btnClipboard = document.createElement('button')
-      btnClipboard.appendChild(clipboard)
-      btnClipboard.classList.add('clipboard')
-
-      const btnBorrar = document.createElement('button')
       btnBorrar.appendChild(trashIcon)
       btnBorrar.classList.add('borrar')
-
-      // btnBorrar.onclick = botonBorrarTarea
       btnBorrar.addEventListener('click', () =>{
         botonBorrarTarea(`${task.id}`)
       })
 
+      btnClipboard.appendChild(clipboard)
+      btnClipboard.classList.add('hecha')
       btnClipboard.addEventListener('click', () =>{
         botonesCambioEstado(task)
       })
 
-      const nombre = document.createElement('p')
       nombre.classList.add('nombre')
       nombre.innerText = `${task.description}`
-
-      const timeStamp = document.createElement('p')
       timeStamp.classList.add('timestamp')
       timeStamp.innerText = `Creado: ${hora.getHours()}:${hora.getMinutes()}hs`
-
-      const descripcion = document.createElement('div')
       descripcion.classList.add('descripcion')
       descripcion.setAttribute('id', `${task.id}`)
-
       descripcion.appendChild(nombre)
       descripcion.appendChild(timeStamp)
       descripcion.appendChild(btnClipboard)
       descripcion.appendChild(btnBorrar)
-
-      const tarea = document.createElement('li')
       tarea.classList.add('tarea')
+      tarea.classList.add('hecha')
       tarea.appendChild(descripcion)
 
-      undoneTasksList.appendChild(tarea)
+      task.completed ? doneTasksList.appendChild(tarea) : undoneTasksList.appendChild(tarea)
     })
   };
 

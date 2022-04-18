@@ -106,7 +106,7 @@ main h2 {
 
 /* ------------Tareas pendientes */
 #cantidad-pendientes {
-    background-color: var(--rojo);
+    background-color: var(--laranja);
     border-radius: 50vh;
     padding: .1rem .5rem ;
 }
@@ -136,11 +136,14 @@ main h2 {
 .tareas-pendientes .tarea button:hover i {
     color: var(--verde);
 }
+.tareas-pendientes .tarea button:hover .fa-trash-can {
+    color: var(--laranja);
+}
 
 .tareas-pendientes .tarea button:active {
     background-color: var(--verde);
 }
-
+/*fa-clipboard-check*/
 .tareas-pendientes .tarea .descripcion {
     padding: .3rem .5rem;
     flex-grow: 1;
